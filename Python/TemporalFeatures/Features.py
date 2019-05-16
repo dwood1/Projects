@@ -189,19 +189,28 @@ def moving_min(input_array, interval):
 
 def linear_regression_forecast(input_array, window=-1, interval=1):    
     output_array = [x for x in input_array]
+    y_bar = (interval/2)
     l = len(input_array)
     if(window == -1):
         window = l-1 
     for t in range(l):
         if(t-window >= 0):
             x = input_array[t-window:t+1]
-            y = [i for i in range(t-window, t+1)]
-            cov = covariance(x, y)
+            cov = covariance(x)
             var = variance(x)
             a_hat = cov/var
-            b_hat = average(y)-a_hat*average(x)
-            output_array[t] = (a_hat)*(t+interval)+(b_hat)
+            b_hat = average(x) - a_hat*y_bar
+#            print("a_hat: "+str(a_hat)+"--- b_hat: "+str(b_hat))
+            output_array[t] = (a_hat)*(interval)+(b_hat)
     return list(output_array)
+
+def theta_forecast(input_array, window=-1, interval=1):
+    output_array = [x for x in input_array]
+    y_bar = (interval/2)
+    l = len(input_array)
+    if(window == -1):
+        window = l-1 
+#    for t in range(l):
 
 #--------------------------------Derivative-----------------------------------#
 
@@ -223,12 +232,20 @@ def dx_min(input_array, interval):
             output_array[t] = min(temp_list)
     return output_array   
 
-def derivative(input_array, interval):
-    output_array = [0 for x in input_array]
-    l = len(input_array)
-    for t in range(l):
-        if(t-interval >= 0):
-            output_array[t] = input_array[t] - input_array[t-interval]
+def difference(input_array, order=1, interval=1):
+    if(order > 1):
+        temp_array = difference(input_array, order-1, interval)
+        output_array = [0 for x in input_array]
+        l = len(input_array)
+        for t in range(l):
+            if(t-interval >= 0):
+                output_array[t] = temp_array[t] - temp_array[t-interval]
+    else:
+        output_array = [0 for x in input_array]
+        l = len(input_array)
+        for t in range(l):
+            if(t-interval >= 0):
+                output_array[t] = input_array[t] - input_array[t-interval]
     return list(output_array)
 
 def derivative_ratio_max(input_array, interval):
@@ -249,12 +266,20 @@ def derivative_ratio_min(input_array, interval):
             output_array[t] = min(temp_list)
     return output_array   
 
-def derivative_ratio(input_array, interval):
-    output_array = [1 for x in input_array]
-    l = len(input_array)
-    for t in range(l):
-        if(t-interval >= 0):
-            output_array[t] = input_array[t]/input_array[t-interval]
+def difference_ratio(input_array, order=1, interval=1):
+    if(order > 1):
+        temp_array = difference_ratio(input_array, order-1, interval)
+        output_array = [1 for x in input_array]
+        l = len(input_array)
+        for t in range(l):
+            if(t-interval >= 0):
+                output_array[t] = temp_array[t]/temp_array[t-interval]
+    else:
+        output_array = [1 for x in input_array]
+        l = len(input_array)
+        for t in range(l):
+            if(t-interval >= 0):
+                output_array[t] = input_array[t]/input_array[t-interval]
     return list(output_array)
 
 def movement_ratio(input_array, output_type="PERCENT"):

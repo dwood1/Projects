@@ -2,12 +2,12 @@ import numpy as np
 import matplotlib.pyplot as plt
 from binance.client import Client
 import time
-from keras.layers import LSTM, Dense, TimeDistributed, Dropout
-from keras.models import Sequential
-from keras import optimizers
+#from keras.layers import LSTM, Dense, TimeDistributed, Dropout
+#from keras.models import Sequential
+#from keras import optimizers
 from sklearn.preprocessing import MinMaxScaler
 import sys
-sys.path.insert(0, 'C:\\Users\\Dave.Wood\\Python')
+sys.path.insert(0, 'C:\\Users\\dwood\\Python')
 from TemporalFeatures import Features as tp
 
 #-----------------------------------------------------------------------------#
@@ -18,10 +18,10 @@ api_key = 'EdZbJVPs0BmKaDQWr4lw0EXT6deDKcubL9W7Mc66xDLXa2xC78t09PpfLeYY0d4x'
 api_secret = 'BG6UffLixG83BdmqwObfuzAVSlhCQBqFBAMFIOQHIphkmBS2CT2qAQcYWFCvy22S'
 client = Client(api_key, api_secret)
 
-token = 'BTC'
+token = 'ETH'
 asset = 'USDT'
 duration = 12   #Hours
-data_days = 100  #Days
+data_days = 30  #Days
 
 #-----------------------------------------------------------------------------#
 pretime = time.time()
@@ -145,10 +145,10 @@ while(count < duration*60):
 # Insert the test bot here
 li = []
 
-token = 'BTC'
+token = 'ETH'
 asset = 'USDT'
 duration = 12   #Hours
-data_days = 200  #Days
+data_days = 30  #Days
 
 #-----------------------------------------------------------------------------#
 pretime = time.time()
@@ -159,106 +159,161 @@ open_price = list([float(i[1]) for i in klines])
 
 print(str(time.time() - pretime))
 
-for j in range(1, 61):
+for j in range(1, 2):
+    timeNOW = time.time()
+    
+    res_01 = tp.resistance(open_price, 360)
+    sup_01 = tp.support(open_price, 360)
+#   
+    mov_dx_1 = tp.difference_ratio(open_price, 2)
+#    mov_dx_2 = tp.derivative_ratio(open_price, 100)
+    
+#    movement = tp.movement_ratio(open_price)
+    
+#    mov_avg_01 = tp.moving_average(open_price, 8*1440)
+#    mov_tdssd = tp.moving_tdssd(open_price, 7200)
+#    ssd = tp.sample_standard_deviation(open_price)
+    
+    res_trend = tp.resistance_trendline(open_price, 1440, 0.6)
+    sup_trend = tp.support_trendline(open_price, 1440, 0.6)
+    print(str(time.time() - timeNOW))
+    
     return_sweep = []
     exchange_sweep = []  
     
-    timeNOW = time.time();
-    
-    res_01 = tp.resistance(open_price, 315)
-    sup_01 = tp.support(open_price, 315)
-    res_trend = tp.resistance_trendline(open_price, 2880, 0.6)
-    sup_trend = tp.support_trendline(open_price, 2880, 0.6)
-    mov_dx = tp.derivative_ratio(open_price, 10)
-    
-    print(str(time.time() - timeNOW));
-    
-    for i in range(0, 101):        
+    for i in range(0, 1, 1):
+#        mov_avg = tp.moving_average(open_price, 1440*2)        
         exchange_fee = 0.001
-        risk_coeff = i/100
+        risk_coeff = 90/100
         
         funds = 10000
         funds_list = [funds]
         tokens = 0
         tokens_list = [(funds+tokens*open_price[0])] 
-        value_list = [(funds, True)]
+        value_list = [funds]
         
-        exchange_price = []
+        exchange_info = []
         
         buy_val = 0
         sell_val = 0
-        
-        good_exchange_counter = 0
-        bad_exchange_counter = 0        
-                
+        buy_price = -1                
         for x in range(1, len(open_price)):
             current_price = open_price[x]
             
-            fund_check = int(funds*risk_coeff*100)/100
-            token_sell = int(tokens*risk_coeff*100)/100
+            fund_check = int(funds*risk_coeff*1000)/1000
+            token_sell = int(tokens*risk_coeff*1000)/1000
             
-            token_buy = int((funds/current_price)*risk_coeff*100)/100
-            value_check = int(risk_coeff*current_price*tokens*100)/100
+            token_buy = int((funds/current_price)*risk_coeff*1000)/1000
+            value_check = int(risk_coeff*current_price*tokens*1000)/1000
             
-            if(((current_price > res_trend[x] and (current_price > res_01[x]))            
+#            elif((((current_price < sup_01[x]) and (current_price < sup_trend[x])
+##                    and (sup_trend[x-1] >= sup_trend[x])
+#                    )
+#                    or (mov_dx_1[x] >= 1 + (i/10000))
+##                    or (mov_dx_2[x] >= 1 + (i/10000))
+##                    or (current_price >= buy_price*(1 + 330/10000))
+#                    ) and 
+#                    (value_check > 10)):   
+#                buybool = False                
+#                funds = funds + (1-exchange_fee)*current_price*token_sell                
+#                tokens = tokens - risk_coeff*tokens
+#                exchange_info.append(("Sell", current_price, (1-exchange_fee)*token_sell))
+            if(((current_price > res_trend[x] and (current_price > res_01[x])
+#                    and (mov_avg_01[x-1] < mov_avg_01[x])
+                    )  
                     ) and         
                     (fund_check > 10)): 
                 buybool = True                       
                 tokens = tokens + (1-exchange_fee)*token_buy                
-                funds = funds - current_price*token_buy        
-            elif((((current_price < sup_01[x]) and (current_price < sup_trend[x]))
-                    or (mov_dx[x] >= 1 + (120/10000))
-                    ) and 
-                    (value_check > 10)):   
+                funds = funds - current_price*token_buy     
+                exchange_info.append(("Buy", current_price, (1-exchange_fee)*token_buy)) 
+#                buy_price = current_price
+            elif((((current_price < sup_01[x]) and (current_price < sup_trend[x])
+#                    and (sup_trend[x-1] >= sup_trend[x])
+                )
+                or (mov_dx_1[x] >= 0.99 + (0/1000))
+#                    or (mov_dx_2[x] >= 1 + (i/10000))
+#                    or (current_price >= buy_price*(1 + 330/10000))
+                ) and 
+                (value_check > 10)):   
                 buybool = False                
                 funds = funds + (1-exchange_fee)*current_price*token_sell                
-                tokens = tokens - risk_coeff*tokens       
+                tokens = tokens - risk_coeff*tokens
+                exchange_info.append(("Sell", current_price, (1-exchange_fee)*token_sell))
             else:
                 funds_list.append(funds)
                 tokens_list.append(tokens)         
-            if((funds+tokens*current_price)/value_list[x-1][0] == 1):
-                value_list.append((funds+tokens*current_price, True))            
+            
+            value_list.append(funds+tokens*current_price) 
+        buy_price = -1
+        sell_price = -1
+        good_trade_count = 1
+        bad_trade_count = 1
+        buy_is_after_sell = False
+        sale_weight = 0
+        buy_weight = 0
+        for x in exchange_info:
+            if x[0] == "Buy":
+                if buy_is_after_sell:
+                    buy_price = ((buy_price*buy_weight)+(x[1]*x[2]))/(buy_weight+x[2])
+                    buy_weight = buy_weight+x[2] 
+                else:
+                    buy_price = x[1]
+                    buy_weight = x[2]
+                buy_is_after_sell = True
+                sale_weight = 0
             else:
-                value_list.append((funds+tokens*current_price, False))            
+                if not buy_is_after_sell:                    
+                    sell_price = ((sell_price*sale_weight)+(x[1]*x[2]))/(sale_weight+x[2])  
+                    sale_weight = sale_weight+x[2]                   
+                else:
+                    sell_price = x[1]
+                    sale_weight = x[2]
+                buy_is_after_sell = False
+                buy_weight = 0
+            if buy_price < sell_price and buy_price > 0:
+                good_trade_count+=1;
+            if sell_price < buy_price and sell_price > 0 and buy_is_after_sell == False:
+                bad_trade_count+=1;
+#            print("good: "+str(good_trade_count)+"; bad: "+str(bad_trade_count)+"; ")
         print(str(i) +
-              ": return = : " + 
+              ": Return = : " + 
               str(value_list[-1]/value_list[0]) +
-              ", Funds: " + 
-              str(funds) + 
+              ", Funds: " +     
+              str(int(funds*100 )/100) + 
               ", Tokens: " + 
-              str(tokens))          
-        return_sweep.append(value_list[-1]/value_list[0])        
+              str(int(tokens*100)/100) +
+              ", Trade Ratio: " +
+              str(good_trade_count/(good_trade_count + bad_trade_count)) +
+              ", Exg. per day: " +
+              str((good_trade_count + bad_trade_count)/data_days))        
+        return_sweep.append(value_list[-1]/value_list[0])  
+        exchange_sweep.append(good_trade_count/(good_trade_count+bad_trade_count)) 
        
-      
-#    li.append(sweep.index(max(sweep)))
 #-----------------------------------------------------------------------------#
-# Plotting and Visualization        
+
+
+# Normalize Data
+normalize_average = tp.normalize(mov_avg_01)
+normalized_value_list = tp.normalize(value_list)
+normalized_open_price = tp.normalize(open_price)
+normalized_x = tp.normalize(mov_tdssd)
+#-----------------------------------------------------------------------------#
+# Plotting and Visualization 
+plt.plot(normalized_open_price, color='orange')
+plt.plot(normalized_value_list, color='black')       
 plt.plot(return_sweep)
 plt.plot(exchange_sweep)
-plt.plot(li)
-
-plt.plot(open_price, color='orange')
-plt.plot([x[0] for x in value_list[:]], color='black')
-
-plt.plot(res_01, color='green')
-plt.plot(sup_01, color='magenta')
-
-plt.plot(res_trend, color='red')
-plt.plot(sup_trend, color='blue')
-
-plt.plot(mov_avg_01, color='cyan')
-
-plt.plot(mov_dx, color='blue')
-
-plt.plot(buy_marker, color='blue')
-plt.plot(sell_marker, color='red')
-
-plt.plot(top_range, color='blue')
-plt.plot(bot_range, color='red')
-plt.plot([top_range[i] - bot_range[i] for i in range(len(open_price))])
-
-plt.plot(variance, color='blue')
-    
+plt.plot(mov_dx_1)
+plt.plot(mov_dx_2)
+plt.plot(normalize_average, color='cyan')
+plt.plot(open_price)
+plt.plot(movement)
+plt.hist(movement, bins = 10)    
+plt.plot(mov_tdssd)
+plt.plot(normalized_x)
+lin_reg_forecast = tp.linear_regression_forecast(open_price, 2*1440, 1)
+plt.plot(lin_reg_forecast)
 #-----------------------------------------------------------------------------#
     # Statistical Model
         # Feature Generation

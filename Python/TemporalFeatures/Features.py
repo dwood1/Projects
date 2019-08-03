@@ -205,6 +205,7 @@ def linear_regression_forecast(input_array, window=-1, interval=1):
     return list(output_array)
 
 def theta_forecast(input_array, window=-1, interval=1):
+           # not fully implemented
     output_array = [x for x in input_array]
     y_bar = (interval/2)
     l = len(input_array)

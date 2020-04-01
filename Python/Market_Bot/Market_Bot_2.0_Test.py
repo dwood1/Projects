@@ -13,8 +13,8 @@ from TemporalFeatures import Features as tp
 #----------------------------------------------------------------------------------#
 np.random.seed(seed=7)
 
-api_key = 'EdZbJVPs0BmKaDQWr4lw0EXT6deDKcubL9W7Mc66xDLXa2xC78t09PpfLeYY0d4x'
-api_secret = 'BG6UffLixG83BdmqwObfuzAVSlhCQBqFBAMFIOQHIphkmBS2CT2qAQcYWFCvy22S'
+api_key = ''
+api_secret = ''
 client = Client(api_key, api_secret)
 
 token = 'BTC'

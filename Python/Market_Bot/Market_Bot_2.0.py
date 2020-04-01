@@ -15,8 +15,8 @@ from TemporalFeatures import Features as tp
 
 np.random.seed(seed=7)
 
-api_key = 'EdZbJVPs0BmKaDQWr4lw0EXT6deDKcubL9W7Mc66xDLXa2xC78t09PpfLeYY0d4x'
-api_secret = 'BG6UffLixG83BdmqwObfuzAVSlhCQBqFBAMFIOQHIphkmBS2CT2qAQcYWFCvy22S'
+api_key = ''
+api_secret = ''
 client = Client(api_key, api_secret)
 
 token = 'BTC'
@@ -45,8 +45,8 @@ number_of_trades = list([float(i[8]) for i in klines])
 taker_buy_base_asset_volume =  list([float(i[9]) for i in klines])
 taker_buy_quote_asset_volume = list([float(i[10]) for i in klines])
 
-ACCESS_KEY = 'AKIA45KELN3CDJPO4JOD'
-SECRET_KEY = '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'
+ACCESS_KEY = ''
+SECRET_KEY = ''
 SESSION_TOKEN = ''
 
 dynamodb = boto3.resource(
